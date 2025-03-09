@@ -44,7 +44,7 @@ public class Renderer {
                     break;
                 case CIRCLE:
                     glColor3f(0.8f, 0.8f, 0.0f); // Яскравий колір для кола
-                    drawCircle(object, false); // Не малюємо окремо промені
+                    drawCircle(object, true); // Не малюємо окремо промені
                     break;
             }
 
@@ -147,8 +147,8 @@ public class Renderer {
 
     // Відображення променів для налагодження
     private void drawDebugRays(Point localCenter, float radius, float objectX, float objectY) {
-        float globalCenterX = localCenter.getX() + objectX;
-        float globalCenterY = localCenter.getY() + objectY;
+        float globalCenterX = localCenter.getX();
+        float globalCenterY = localCenter.getY();
         float lightLength = 2.0f;
 
         glColor3f(1.0f, 0.0f, 0.0f);
@@ -156,6 +156,7 @@ public class Renderer {
 
         for (int i = 0; i < LIGHT_SEGMENTS; i++) {
             float angle = (float) (2.0f * Math.PI * i / LIGHT_SEGMENTS);
+
             float circleX = globalCenterX + (float) Math.cos(angle) * radius;
             float circleY = globalCenterY + (float) Math.sin(angle) * radius;
             float dirX = (float) Math.cos(angle);
@@ -163,13 +164,14 @@ public class Renderer {
             float endX = circleX + dirX * lightLength;
             float endY = circleY + dirY * lightLength;
 
-            Point start = new Point(circleX, circleY);
-            Point end = new Point(endX, endY);
-            Point intersections = intersection.findIntersectionWithPolygons(start, end, objects);
+            Point adjustedStart = new Point(circleX + objectX, circleY + objectY);
+            Point adjustedEnd = new Point(endX + objectX, endY + objectY);
+            Point intersections = intersection.findIntersectionWithPolygons(adjustedStart, adjustedEnd, objects);
 
             glVertex2f(circleX, circleY);
             if (intersections != null) {
-                glVertex2f(intersections.getX(), intersections.getY());
+
+                glVertex2f(intersections.getX() - objectX, intersections.getY() - objectY);
             } else {
                 glVertex2f(endX, endY);
             }
